@@ -78,21 +78,65 @@ cc.Class({
 
         this.startBtn.interactable = false;
         NetCtrl.dataEventHandler = this.node;
-        this.node.on('joinfail', this.onJoinFail, this);
-        this.node.on('logonsuccess', this.onLogonSuccess, this);
+        this.node.on('netmsg',this.onNetMsg,this);
+       // this.node.on('joinfail', this.onJoinFail, this);
+        //this.node.on('logonsuccess', this.onLogonSuccess, this);
     },
-    onJoinFail(msg) {
-       // msg = msg.detail;
-        let data = msg.data;
-        this.startBtn.interactable = false;
-        this.failTime = new Date().getTime();
-        this.leftTime = data.leftTime;
-        this.setLeftClock(data.leftTime);
-        this.statusInfoLabel.string = "上轮您已结束，请等待下轮开始!";
+    // onJoinFail(msg) {
+    //    // msg = msg.detail;
+    //     let data = msg.data;
+    //     this.startBtn.interactable = false;
+    //     this.failTime = new Date().getTime();
+    //     this.leftTime = data.leftTime;
+    //     this.setLeftClock(data.leftTime);
+    //     this.statusInfoLabel.string = "上轮您已结束，请等待下轮开始!";
+    // },
+    // onLogonSuccess(data) {
+    //   //  msg = msg.detail;
+    //     //let data = msg.data;
+    //     if (data.dead) {
+    //         this.startBtn.interactable = false;
+    //         this.statusInfoLabel.string = "上轮您已结束，请等待下轮开始!";
+    //         this.failTime = new Date().getTime();
+    //         this.leftTime = data.leftTime;
+    //         this.setLeftClock(data.leftTime);
+    //     } else {
+    //         this.startBtn.interactable = true;
+    //         this.statusInfoLabel.string = "";
+    //     }
+    // },
+    onNetMsg(msg){
+        let  data = msg.data
+        switch (msg.name){
+            case "cmsg.RespLogin":
+                this.onRespLogin(data);
+                break;
+            case "cmsg.RespJoinGame":
+                this.onRespJoinGame(data);
+                break;    
+            case "cmsg.RespEnterGame":
+                this.onRespEnterGame(data);
+                break;             
+        }
     },
-    onLogonSuccess(msg) {
-      //  msg = msg.detail;
-        let data = msg.data;
+    onRespLogin(data){
+        if (data.Err!==0){
+            return 
+        }
+
+        if (data.inGame){
+            this.SendJoinGameMsg();
+        }else{
+            this.startBtn.interactable = true;
+            this.statusInfoLabel.string = "";
+        }
+        
+    },
+    onRespEnterGame(data){
+        if (data.Err!==0){
+            return 
+        }
+
         if (data.dead) {
             this.startBtn.interactable = false;
             this.statusInfoLabel.string = "上轮您已结束，请等待下轮开始!";
@@ -100,35 +144,35 @@ cc.Class({
             this.leftTime = data.leftTime;
             this.setLeftClock(data.leftTime);
         } else {
-            this.startBtn.interactable = true;
-            this.statusInfoLabel.string = "";
+            G.userInfo = data.userInfo;
+            G.config = data.config;
+            G.entityID = data.entityID;
+            cc.director.loadScene('game');
         }
     },
-    sendLogonWX() {
-        var msg = {};
-        msg.code = "";
-        msg.name = "";
-        msg.avatarUrl = "";
-        NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_GAME, msg);
+    onRespJoinGame(data){
+        if(data.Err!=0){
+            this.statusInfoLabel.string = "加入游戏失败!";
+            return 
+        }
+        this.SendReqJoinGameMsg();
     },
-    // //登录
-    // clickStartBtn() {
-    //     NetCtrl.createNewSocket(() => {
-    //         // if (G.accountType === Cmd.ACCOUNT_TYPE_WX) {
-    //         //     this.sendLogonWXOpenID();
-    //         // } else {
-    //         this.sendLogonVisitorMsg();
-    //         //  }
-    //     });
+
+    SendReqJoinGameMsg(){
+        NetCtrl.Send("cmsg.ReqEnterGame");
+    },
+
+    // sendLogonWX() {
+    //     var msg = {};
+    //     msg.code = "";
+    //     msg.name = "";
+    //     msg.avatarUrl = "";
+    //     NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_GAME, msg);
     // },
     clickJoinGame() {
         cc.log("click join");
         NetCtrl.createNewSocket(() => {
-            cc.log("create new socket");
-            var msg = {};
-            msg.userID = G.userID;
-            msg.name = this.nameEditBox.string;
-            NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_JOIN_GAME, msg);
+            NetCtrl.Send("cmsg.ReqJoinGame");
         });
     },
     clockCallback() {
@@ -152,21 +196,19 @@ cc.Class({
     },
     sendLogonVisitorMsg() {
         let localData = JSON.parse(cc.sys.localStorage.getItem('visitorData'));
-        var msg = {};
+        let token = ""
         if (localData !== null) {
-            msg.userID = localData.userID;
-        } else {
-            msg.userID = 0;
-        }
-        msg.name = this.nameEditBox.string;
-        NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_VISITOR, msg);
+            token = localData.token;
+        } 
+        let  nickname = this.nameEditBox.string;
+        NetCtrl.Send("cmsg.ReqLogin",{token:token,nickname:nickname});
     },
-    sendLogonWXOpenID() {
-        var msg = {};
-        msg.openID = G.openID;
-        NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_OPENID, msg);
-    },
-    onDestroy() {
-        this.node.off('joinfail', this.onJoinFail, this);
-    }
+    // sendLogonWXOpenID() {
+    //     var msg = {};
+    //     msg.openID = G.openID;
+    //     NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_OPENID, msg);
+    // },
+    // onDestroy() {
+    //     this.node.off('joinfail', this.onJoinFail, this);
+    // }
 });
