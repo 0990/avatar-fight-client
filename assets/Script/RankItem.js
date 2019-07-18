@@ -25,7 +25,7 @@ cc.Class({
 
     },
     setItemData(data) {
-        this.nameLabel.string = data.rank + "   " + data.name;
+        this.nameLabel.string = data.rank + "   " + data.nickname;
         this.scoreLabel.string = data.killCount + "   " + data.score;
         this.showAvatar(data.headImgUrl);
     },

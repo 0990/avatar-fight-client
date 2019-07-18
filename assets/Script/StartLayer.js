@@ -19,68 +19,59 @@ cc.Class({
         nameEditLayer: cc.Node,
         nameEditBox: cc.EditBox,
         clockLabel: cc.Label,
-        // foo: {
-        //     // ATTRIBUTES:
-        //     default: null,        // The default value will be used only when the component attaching
-        //                           // to a node for the first time
-        //     type: cc.SpriteFrame, // optional, default is typeof default
-        //     serializable: true,   // optional, default is true
-        // },
-        // bar: {
-        //     get () {
-        //         return this._bar;
-        //     },
-        //     set (value) {
-        //         this._bar = value;
-        //     }
-        // },
     },
 
     // LIFE-CYCLE CALLBACKS:
     onLoad() {
         // G.alert("网络连接失败，请检查网络", G.AT.OK);
-        if (cc.sys.platform === cc.sys.WECHAT_GAME) {
-            wx.login({
-                success: function (info) {
-                    wx.getUserInfo({
-                        success: function (res) {
-                            let userInfo = res.userInfo;
-                            cc.log(userInfo.nickName);
-                            NetCtrl.createNewSocket(() => {
-                                var msg = {};
-                                msg.code = info.code;
-                                msg.name = userInfo.nickName;
-                                msg.avatarUrl = userInfo.avatarUrl;
-                                NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_TEMP, msg);
-                            });
-                        }
-                    })
-                }
-            });
-        } else {
-            let code = Util.getQueryString('code');
-            if (code) {
-                let msg = {};
-                msg.code = code;
-                NetCtrl.createNewSocket(() => {
-                    NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_WX_LOGON_FIRST, msg);
-                });
-            } else {
-                let localData = JSON.parse(cc.sys.localStorage.getItem('visitorData'));
-                if (localData !== null && localData.name) {
-                    this.nameEditBox.string = localData.name;
-                }
-                NetCtrl.createNewSocket(() => {
-                    this.sendLogonVisitorMsg();
-                });
-            }
-        }
+        // if (cc.sys.platform === cc.sys.WECHAT_GAME) {
+        //     wx.login({
+        //         success: function (info) {
+        //             wx.getUserInfo({
+        //                 success: function (res) {
+        //                     let userInfo = res.userInfo;
+        //                     cc.log(userInfo.nickName);
+        //                     NetCtrl.createNewSocket(() => {
+        //                         var msg = {};
+        //                         msg.code = info.code;
+        //                         msg.name = userInfo.nickName;
+        //                         msg.avatarUrl = userInfo.avatarUrl;
+        //                         NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_TEMP, msg);
+        //                     });
+        //                 }
+        //             })
+        //         }
+        //     });
+        // } else {
+        //     let code = Util.getQueryString('code');
+        //     if (code) {
+        //         let msg = {};
+        //         msg.code = code;
+        //         NetCtrl.createNewSocket(() => {
+        //             NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_WX_LOGON_FIRST, msg);
+        //         });
+        //     } else {
+        //         let localData = JSON.parse(cc.sys.localStorage.getItem('visitorData'));
+        //         if (localData !== null && localData.name) {
+        //             this.nameEditBox.string = localData.name;
+        //         }
+        //         NetCtrl.createNewSocket(() => {
+        //             this.sendLogonVisitorMsg();
+        //         });
+        //     }
+        // }
 
-        this.startBtn.interactable = false;
+        let nickname = cc.sys.localStorage.getItem('nickname');
+        this.nameEditBox.string = nickname;
+       
         NetCtrl.dataEventHandler = this.node;
         this.node.on('netmsg',this.onNetMsg,this);
-       // this.node.on('joinfail', this.onJoinFail, this);
-        //this.node.on('logonsuccess', this.onLogonSuccess, this);
+
+        //如果没有登录，自动登录
+        if (!G.isLogined){
+            this.startBtn.interactable = false;
+            this.login()
+        }
     },
     // onJoinFail(msg) {
     //    // msg = msg.detail;
@@ -105,9 +96,14 @@ cc.Class({
     //         this.statusInfoLabel.string = "";
     //     }
     // },
+    login(){
+        NetCtrl.createNewSocket(() => {
+            this.sendLogonVisitorMsg();
+        });
+    },
     onNetMsg(msg){
         let  data = msg.data
-        switch (msg.name){
+        switch (msg.msgName){
             case "cmsg.RespLogin":
                 this.onRespLogin(data);
                 break;
@@ -123,6 +119,10 @@ cc.Class({
         if (data.Err!==0){
             return 
         }
+
+        cc.sys.localStorage.setItem('token', data.token);
+        G.userID = data.userID;
+        G.isLogined = true;
 
         if (data.inGame){
             this.SendJoinGameMsg();
@@ -141,10 +141,9 @@ cc.Class({
             this.startBtn.interactable = false;
             this.statusInfoLabel.string = "上轮您已结束，请等待下轮开始!";
             this.failTime = new Date().getTime();
-            this.leftTime = data.leftTime;
-            this.setLeftClock(data.leftTime);
+            this.leftTime = data.gameLeftSec;
+            this.setLeftClock(this.leftTime);
         } else {
-            G.userInfo = data.userInfo;
             G.config = data.config;
             G.entityID = data.entityID;
             cc.director.loadScene('game');
@@ -155,25 +154,18 @@ cc.Class({
             this.statusInfoLabel.string = "加入游戏失败!";
             return 
         }
+        G.nickname = data.nickname;
         this.SendReqJoinGameMsg();
     },
 
     SendReqJoinGameMsg(){
         NetCtrl.Send("cmsg.ReqEnterGame");
     },
-
-    // sendLogonWX() {
-    //     var msg = {};
-    //     msg.code = "";
-    //     msg.name = "";
-    //     msg.avatarUrl = "";
-    //     NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_GAME, msg);
-    // },
     clickJoinGame() {
         cc.log("click join");
-        NetCtrl.createNewSocket(() => {
-            NetCtrl.Send("cmsg.ReqJoinGame");
-        });
+        let nickname = this.nameEditBox.string
+        cc.sys.localStorage.setItem('nickname', nickname);
+        NetCtrl.Send("cmsg.ReqJoinGame",{nickname:nickname});
     },
     clockCallback() {
         let count = parseInt(this.leftTime - (new Date().getTime() - this.failTime) / 1000);
@@ -195,20 +187,10 @@ cc.Class({
         this.schedule(this.clockCallback, 1);
     },
     sendLogonVisitorMsg() {
-        let localData = JSON.parse(cc.sys.localStorage.getItem('visitorData'));
-        let token = ""
-        if (localData !== null) {
-            token = localData.token;
-        } 
-        let  nickname = this.nameEditBox.string;
-        NetCtrl.Send("cmsg.ReqLogin",{token:token,nickname:nickname});
+        let token = cc.sys.localStorage.getItem('token');
+        NetCtrl.Send("cmsg.ReqLogin",{token:token});
     },
-    // sendLogonWXOpenID() {
-    //     var msg = {};
-    //     msg.openID = G.openID;
-    //     NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_OPENID, msg);
-    // },
-    // onDestroy() {
-    //     this.node.off('joinfail', this.onJoinFail, this);
-    // }
+    onDestroy() {
+        this.node.off('netmsg', this.onNetMsg, this);
+    }
 });

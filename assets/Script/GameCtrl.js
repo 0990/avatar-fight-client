@@ -60,10 +60,12 @@ cc.Class({
         let now = new Date().getTime();
         if (now - this.lastShootTime < 600) return;
         this.lastShootTime = now;
-        NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_SHOOT);
+        NetCtrl.Send("cmsg.ReqShoot");
+        //NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_SHOOT);
     },
     sendJumpMessage() {
-        NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_JUMP);
+        NetCtrl.Send("cmsg.ReqJump");
+       // NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_JUMP);
     },
     createEntity(info) {
         let entity = null;
@@ -102,28 +104,29 @@ cc.Class({
         this.bulletLayer.removeAllChildren();
         this.lastShootTime = 0;
         this.pressTime = 0;
-        NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_GAME_SCENE);
+        NetCtrl.Send("cmsg.ReqGameScene")
+        //NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_GAME_SCENE);
     },
     entityDied(node) {
         this.entityPool.put(node);
     },
-    onGameMessage: function (msg) {
+    onNetMsg: function (msg) {
         //msg = msg.detail;
         var data = msg.data;
-        if (this.sceneReady === false && msg.subID !== Cmd.SUB_MB_GAME_SCENE) return;
-        switch (msg.subID) {
-            case Cmd.SUB_MB_GAME_SCENE: {
+        //if (this.sceneReady === false && msg.subID !== Cmd.SUB_MB_GAME_SCENE) return;
+        switch (msg.msgName) {
+            case "cmsg.RespGameScene": {
                 this.sceneReady = true;
-                this._showingLayerJS.setLeftClock(data.leftTime);
+                this._showingLayerJS.setLeftClock(data.gameLeftSec);
                 for (let i = 0; i < data.entities.length; i++) {
                     this.createEntity(data.entities[i]);
                 }
                 this.schedule(this.calculateRank, 2);
             }
-            case Cmd.SUB_MB_CALCULATE_RESULT: {
-                if (data.entityDeleteList) {
-                    for (let i = 0; i < data.entityDeleteList.length; i++) {
-                        let entityID = data.entityDeleteList[i];
+            case "cmsg.SNoticeWorldChange": {
+                if (data.deleteEntities) {
+                    for (let i = 0; i < data.deleteEntities.length; i++) {
+                        let entityID = data.deleteEntities[i];
                         if (G.entityID === entityID) {
                         } else {
                             let itemJS = this.entityMap.get(entityID);
@@ -134,9 +137,9 @@ cc.Class({
                     }
                 }
 
-                if (data.bulletDeleteList) {
-                    for (let i = 0; i < data.bulletDeleteList.length; i++) {
-                        let bulletID = data.bulletDeleteList[i];
+                if (data.deleteBullets) {
+                    for (let i = 0; i < data.deleteBullets.length; i++) {
+                        let bulletID = data.deleteBullets[i];
                         if (this.bulletMap.has(bulletID)) {
                             let itemJS = this.bulletMap.get(bulletID);
                             this.bulletMap.delete(bulletID);
@@ -145,9 +148,9 @@ cc.Class({
                     }
                 }
 
-                if (data.entityChangeList) {
-                    for (let i = 0; i < data.entityChangeList.length; i++) {
-                        let item = data.entityChangeList[i];
+                if (data.changedEntities) {
+                    for (let i = 0; i < data.changedEntities.length; i++) {
+                        let item = data.changedEntities[i];
                         let itemJS = this.entityMap.get(item.entityID);
                         if (item.entityID === G.entityID && item.score !== itemJS.score) {
                             this._showingLayerJS.showGetScore(item.score - itemJS.score);
@@ -158,14 +161,14 @@ cc.Class({
 
                 break;
             }
-            case Cmd.SUB_MB_NEW_ENTITY: {
+            case "cmsg.SNoticeNewEntity": {
                 if (data.entityID === G.entityID) return;
                 if (this.entityMap.has(data.entityID)) return;
                 this.createEntity(data);
                 break;
             }
             //接受所有玩家的状态
-            case Cmd.SUB_MB_WORLD_STATE: {
+            case "cmsg.SNoticeWorldPos": {
                 let now = new Date().getTime();
                 if (data.entities) {
                     for (let i = 0; i < data.entities.length; i++) {
@@ -182,7 +185,7 @@ cc.Class({
                                 let j = 0;
                                 while (j < this.pendingInputs.length) {
                                     let input = this.pendingInputs[j];
-                                    if (input.inputSequenceNumber <= item.lastProcessedInput) {
+                                    if (input.inputSequenceNumber <= data.lastProcessedInputID) {
                                         this.pendingInputs.splice(j, 1);
                                     } else {
                                         entityJS.applyInput(input);
@@ -207,15 +210,15 @@ cc.Class({
                 }
                 break;
             }
-            case Cmd.SUB_MB_SHOOT: {
+            case "cmsg.SNoticeShoot": {
                 this.createBullet(data);
-                this.playBulletEffect(data.creatorID);
+                this.playBulletEffect(data.creatorEntityID);
                 break;
             }
-            case Cmd.SUB_MB_GAME_END: {
+            case "cmsg.SNoticeGameOver": {
                 this.unschedule(this.calculateRank);
                 this._actionLayerJS.hide();
-                NetCtrl.close();
+                //NetCtrl.close();
                 this.sceneReady = false;
                 //play anim and turn to "end" scene
                 G.gameEnd = data;
@@ -245,20 +248,11 @@ cc.Class({
                         }
                     });
                     G.gameEnd.rankInfo = objArr;
-                    // for (let i = 0; i < objArr.length; i++) {
-                    //     if (i < 3) {
-                    //         let index = i + 1;
-                    //         let entityJS = this.entityMap.get(objArr[i].entityID);
-                    //         let string = index + "," + entityJS.score + "分:" + entityJS.name;
-                    //         this._showingLayerJS.setRank(i, string);
-                    //     }
-                    // }
                 } else {
-                    for (let i = 0; i < data.rankInfo.length; i++) {
-                        let item = data.rankInfo[i];
-                        item.name = this.entityMap.get(item.entityID).name;
-                    }
-                    // cc.director.loadScene('end');
+                    // for (let i = 0; i < data.rankInfo.length; i++) {
+                    //     let item = data.rankInfo[i];
+                    //     item.name = this.entityMap.get(item.entityID).name;
+                    // }
                 }
                 this.playGameEnd();
                 break;
@@ -313,7 +307,7 @@ cc.Class({
         }
     },
     onDestroy: function () {
-        this.node.off('gamemessage', this.onGameMessage, this);
+        this.node.off('netmsg', this.onNetMsg, this);
     },
     update(dt) {
         if (this.sceneReady === false) return;

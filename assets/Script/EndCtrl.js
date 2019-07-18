@@ -70,42 +70,30 @@ cc.Class({
             this.setStatusInfo(string);
         }
     },
-    clickStartBtn() {
-        NetCtrl.createNewSocket(() => {
-            if (G.accountType === Cmd.ACCOUNT_TYPE_WX) {
-                this.sendLogonWXOpenID();
-            } else {
-                this.sendLogonVisitorMsg();
-            }
+    clickReStartBtn(){
+        cc.director.loadScene("start",function(){
+            // var scene = cc.director.getScene();
+            // var canvas = scene._children[0];
+            // let startLayerJS = canvas.getChildName("StartLayer");
+            // startLayerJS.clickJoinGame();
         });
     },
-    clickJoinGame() {
-        cc.log("click join");
-        NetCtrl.createNewSocket(() => {
-            cc.log("create new socket");
-            var msg = {};
-            msg.userID = G.userID;
-            NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_JOIN_GAME, msg);
-        });
-    },
-    sendLogonVisitorMsg() {
-        var msg = {};
-        msg.userID = G.userInfo.userID;
-        msg.name = G.userInfo.name;
-        NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_VISITOR, msg);
-    },
-    sendLogonWXOpenID() {
-        var msg = {};
-        msg.openID = G.userInfo.openID;
-        NetCtrl.send(Cmd.MDM_MB_LOGON, Cmd.SUB_MB_LOGON_WX_OPENID, msg);
-    },
+    // clickStartBtn() {
+    //     NetCtrl.createNewSocket(() => {
+    //         NetCtrl.Send("cmsg.ReLogin",{token:G.userInfo.token});
+    //     });
+    // },
+    // clickJoinGame() {
+    //     cc.log("click join");
+    //     NetCtrl.createNewSocket(() => {
+    //         NetCtrl.Send("cmsg.ReqJoinGame",{nickname:G.userInfo.nickname});
+    //     });
+    // },
     clockCallback() {
         let count = parseInt(this.leftTime - (new Date().getTime() - this.failTime) / 1000);
-        //this.count--;
         if (count <= 0) {
             this.unschedule(this.clockCallback);
             this.setStatusInfo('');
-            //this.killerPos.active = false;
             this.clockLabel.string = '';
             this.startBtn.interactable = true;
         } else {
@@ -117,9 +105,7 @@ cc.Class({
     },
     setLeftClock(leftTime) {
         this.unschedule(this.clockCallback);
-        // this.count = leftTime;
         this.clockLabel.string = this.leftTime;
-        //  this.clockLabel.node.active = true;
         this.schedule(this.clockCallback, 1);
     },
 });
