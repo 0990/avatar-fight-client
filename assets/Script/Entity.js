@@ -81,29 +81,25 @@ cc.Class({
         this.node.y += distance * Math.sin(radian);
         this.node.x += distance * Math.cos(radian);
         this.rotation = newRotation;
-        this.node.rotation = -this.rotation;
+       // this.node.rotation = -this.rotation;
+        this.node.angle  = this.rotation;
     },
     init(info) {
         // this.entityID = info.entityID;
         //this.rotation = -info.rotation;
-        this.rotation = 0;
-        this.node.x = -100;
-        this.node.y = -100;
+        this.rotation = info.rotation;
+        this.node.x = info.x;
+        this.node.y = info.y;
         this.positionBuffer = new Array();
         this.node.color = cc.Color.WHITE;
-        this.name = info.name;
-        this.nameLabel.string = info.name;
+        this.name = info.nickname;
+        this.nameLabel.string = info.nickname;
         this.score = 0;
         this.killCount = 0;
-        // if (info.ghostMode) {
-        //     this.node.opacity = 80;
-        // } else {
-        //this.startProtect();
-        // }
-        if (info.new) {
+        if (info.protected) {
             this.getComponent(cc.Animation).play();
         }
-        this.entityID = info.entityID;
+        this.entityID = info.id;
         this.dead = info.dead;
         this.applyDisplay(info);
         if (info.accountType === 2) {

@@ -1,6 +1,7 @@
 //定义全局的变量
 var Config = require('GlobalConfig');
-var Cmd = require('CmdLogon');
+var Util = require("Util");
+var MsgMgr = require("MsgMgr");
 var NetControl = {
     _socket: null,  //当前的webSocket的对象
     connect: function (callback, num) {
@@ -59,18 +60,53 @@ var NetControl = {
     _onClose: function (event) {
         cc.log(event);
         G.isLogined = false
-        G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
-            cc.director.loadScene("start");
-        });
+        let sceneName = cc.director.getScene().name
+        if (sceneName==="start"){
+            let canvas = cc.director.getScene().getChildByName('Canvas');
+            let startLayer = canvas.getChildByName("startLayer");
+            let startLayerJS = startLayer.getComponent("StartLayer");
+            startLayerJS.showOffline();
+        }else{
+            G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
+                cc.director.loadScene("start",function(){
+                    let canvas = cc.director.getScene().getChildByName('Canvas');
+                    let startLayer = canvas.getChildByName("startLayer");
+                    let startLayerJS = startLayer.getComponent("StartLayer");
+                    startLayerJS.showOffline();
+                });
+            });
+        }
     },
     _onMessage: function (obj) {
-        var msg = JSON.parse(obj.data);
-        var data = msg.data;
-        this.fire('netmsg', msg);
+        cc.log(obj.data instanceof ArrayBuffer);
+        cc.log(obj.data instanceof Blob);
+        cc.log(typeof(obj.data));
+        let reader = new FileReader();
+        let self = this;
+        reader.onload = function(result) {
+            let arrayBuffer = event.target.result;
+            console.log(arrayBuffer);
+            var decode = Util.Decode(arrayBuffer);
+            cc.log("receiver",decode);
+            let protoData = new Uint8Array(decode.protoData);
+            var detail = MsgMgr.Unmarshal(decode.msgID,protoData);
+            cc.log("netmsg",detail);
+            self.fire('netmsg', detail);
+        }
+        reader.readAsArrayBuffer(obj.data);
+
+        //var msg = JSON.parse(obj.data);
+       // var data = msg.data;
+       // this.fire('netmsg', msg);
     },
     Send: function (msgName,dataObj) {
         if (this.isOpen()) {
-            this._socket.send(xxx);
+            let protoData = MsgMgr.Marshal(msgName,dataObj);
+            let msgID = MsgMgr.MsgID(msgName);
+            let data = Util.Encode(msgID,protoData);
+            let fullName = MsgMgr.fullName(msgName);
+            cc.log("send",fullName,msgID,data);
+            this._socket.send(data);
         }
     },
 

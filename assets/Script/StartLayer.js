@@ -10,6 +10,8 @@
 var NetCtrl = require('NetCtrl');
 var Cmd = require('CmdLogon');
 var Util = require('Util');
+	
+let MsgMgr = require("MsgMgr");
 cc.Class({
     extends: cc.Component,
 
@@ -61,14 +63,20 @@ cc.Class({
         //     }
         // }
 
+        MsgMgr.RegisterProtoMsg();
+
         let nickname = cc.sys.localStorage.getItem('nickname');
-        this.nameEditBox.string = nickname;
+        if (nickname){
+            this.nameEditBox.string = nickname;
+        }
+    
        
         NetCtrl.dataEventHandler = this.node;
         this.node.on('netmsg',this.onNetMsg,this);
 
         //如果没有登录，自动登录
         if (!G.isLogined){
+            this.statusInfoLabel.string = "网络连接中...";
             this.startBtn.interactable = false;
             this.login()
         }
@@ -101,22 +109,24 @@ cc.Class({
             this.sendLogonVisitorMsg();
         });
     },
-    onNetMsg(msg){
-        let  data = msg.data
-        switch (msg.msgName){
-            case "cmsg.RespLogin":
+    onNetMsg(detail){
+        cc.log("startLayer netmsg",detail);
+        let  data = detail.data
+        switch (detail.msgName){
+            case "RespLogin":
                 this.onRespLogin(data);
                 break;
-            case "cmsg.RespJoinGame":
+            case "RespJoinGame":
                 this.onRespJoinGame(data);
                 break;    
-            case "cmsg.RespEnterGame":
+            case "RespEnterGame":
                 this.onRespEnterGame(data);
                 break;             
         }
     },
     onRespLogin(data){
-        if (data.Err!==0){
+        if (data.err!="Invalid"){
+            this.statusInfoLabel.string  = data.err
             return 
         }
 
@@ -125,15 +135,16 @@ cc.Class({
         G.isLogined = true;
 
         if (data.inGame){
-            this.SendJoinGameMsg();
+            this.SendReqJoinGameMsg();
         }else{
             this.startBtn.interactable = true;
-            this.statusInfoLabel.string = "";
+            this.statusInfoLabel.string = "Are you ready?";
         }
         
     },
     onRespEnterGame(data){
-        if (data.Err!==0){
+        if (data.err!="Invalid"){
+            this.statusInfoLabel.string  = data.err
             return 
         }
 
@@ -150,8 +161,8 @@ cc.Class({
         }
     },
     onRespJoinGame(data){
-        if(data.Err!=0){
-            this.statusInfoLabel.string = "加入游戏失败!";
+        if (data.err!="Invalid"){
+            this.statusInfoLabel.string  = data.err
             return 
         }
         G.nickname = data.nickname;
@@ -159,13 +170,18 @@ cc.Class({
     },
 
     SendReqJoinGameMsg(){
-        NetCtrl.Send("cmsg.ReqEnterGame");
+        NetCtrl.Send("ReqEnterGame");
     },
     clickJoinGame() {
-        cc.log("click join");
-        let nickname = this.nameEditBox.string
-        cc.sys.localStorage.setItem('nickname', nickname);
-        NetCtrl.Send("cmsg.ReqJoinGame",{nickname:nickname});
+        if (!G.isLogined){
+            this.startBtn.interactable = false;
+            this.statusInfoLabel.string = "connect...";
+            this.login()
+        }else{
+            let nickname = this.nameEditBox.string
+            cc.sys.localStorage.setItem('nickname', nickname);
+            NetCtrl.Send("ReqJoinGame",{nickname:nickname});
+        }
     },
     clockCallback() {
         let count = parseInt(this.leftTime - (new Date().getTime() - this.failTime) / 1000);
@@ -188,9 +204,13 @@ cc.Class({
     },
     sendLogonVisitorMsg() {
         let token = cc.sys.localStorage.getItem('token');
-        NetCtrl.Send("cmsg.ReqLogin",{token:token});
+        NetCtrl.Send("ReqLogin",{token:token});
     },
     onDestroy() {
         this.node.off('netmsg', this.onNetMsg, this);
-    }
+    },
+    showOffline(){
+        this.startBtn.interactable = true
+        this.statusInfoLabel.string = "disconnect,reconnect？";
+    },
 });

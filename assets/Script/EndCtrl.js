@@ -23,6 +23,7 @@ cc.Class({
         entityPrefab: cc.Prefab,
     },
     onLoad() {
+        return ;
         let gameEnd = G.gameEnd;
         if (gameEnd.overReason === Cmd.OVER_REASON_OFFLINE) {
             this.setStatusInfo('断网了，重连?');
@@ -33,28 +34,28 @@ cc.Class({
             this.failTime = new Date().getTime();
             this.setLeftClock(gameEnd.leftTime);
 
-            let killer = cc.instantiate(this.entityPrefab);
-            killer.getComponent('Entity').init(gameEnd.killerInfo);
-            killer.position = cc.v2(0, 0);
-            this.killerPos.addChild(killer);
-            let rank = 0;
-            for (let i = 0; i < gameEnd.rankInfo.length; i++) {
-                let itemData = gameEnd.rankInfo[i];
-                itemData.rank = i + 1;
-                //let string = item.rank + ":" + item.score + "score," + item.name;
-                let slot = cc.instantiate(this.randItemPrefab);
-                //slot.getComponent(cc.Label).string = string;
-                slot.getComponent("RankItem").setItemData(itemData);
-                this.rankContent.addChild(slot);
-                if (itemData.entityID === G.entityID) {
-                    rank = itemData.rank;
-                    this.rankMeItem.getComponent("RankItem").setItemData(itemData);
-                }
-            }
+            // let killer = cc.instantiate(this.entityPrefab);
+            // killer.getComponent('Entity').init(gameEnd.killer);
+            // killer.position = cc.v2(0, 0);
+            // this.killerPos.addChild(killer);
+            // let rank = 0;
+            // for (let i = 0; i < gameEnd.rank.list.length; i++) {
+            //     let itemData = gameEnd.rank.list[i];
+            //     itemData.rank = i + 1;
+            //     //let string = item.rank + ":" + item.score + "score," + item.name;
+            //     let slot = cc.instantiate(this.randItemPrefab);
+            //     //slot.getComponent(cc.Label).string = string;
+            //     slot.getComponent("RankItem").setItemData(itemData);
+            //     this.rankContent.addChild(slot);
+            //     if (itemData.entityID === G.entityID) {
+            //         rank = itemData.rank;
+            //         this.rankMeItem.getComponent("RankItem").setItemData(itemData);
+            //     }
+            // }
         } else {
             let rank = 0;
-            for (let i = 0; i < gameEnd.rankInfo.length; i++) {
-                let itemData = gameEnd.rankInfo[i];
+            for (let i = 0; i < gameEnd.rank.list.length; i++) {
+                let itemData = gameEnd.rank.list[i];
                 itemData.rank = i + 1;
                 //let string = item.rank + ":" + item.score + "score," + item.name;
                 let slot = cc.instantiate(this.randItemPrefab);
@@ -70,12 +71,13 @@ cc.Class({
             this.setStatusInfo(string);
         }
     },
-    clickReStartBtn(){
+    clickRestartBtn(){
         cc.director.loadScene("start",function(){
-            // var scene = cc.director.getScene();
-            // var canvas = scene._children[0];
-            // let startLayerJS = canvas.getChildName("StartLayer");
-            // startLayerJS.clickJoinGame();
+            //var scene = cc.director.getScene();
+            let canvas = cc.director.getScene().getChildByName('Canvas');
+            let startLayer = canvas.getChildByName("startLayer");
+            let startLayerJS = startLayer.getComponent("StartLayer");
+            startLayerJS.clickJoinGame();
         });
     },
     // clickStartBtn() {

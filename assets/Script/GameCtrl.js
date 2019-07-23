@@ -31,7 +31,7 @@ cc.Class({
     // use this for initialization
     onLoad: function () {
         NetCtrl.dataEventHandler = this.node;
-        this.node.on('gamemessage', this.onGameMessage, this);
+        this.node.on('netmsg',this.onNetMsg,this);
 
         this._actionLayerJS = this.actionLayer.getComponent('ActionLayer');
         this._actionLayerJS._managerJS = this;
@@ -60,11 +60,11 @@ cc.Class({
         let now = new Date().getTime();
         if (now - this.lastShootTime < 600) return;
         this.lastShootTime = now;
-        NetCtrl.Send("cmsg.ReqShoot");
+        NetCtrl.Send("ReqShoot");
         //NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_SHOOT);
     },
     sendJumpMessage() {
-        NetCtrl.Send("cmsg.ReqJump");
+        NetCtrl.Send("ReqJump");
        // NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_JUMP);
     },
     createEntity(info) {
@@ -78,7 +78,7 @@ cc.Class({
         let entityJS = entity.getComponent('Entity');
         entityJS._managerJS = this;
         entityJS.init(info);
-        this.entityMap.set(info.entityID, entityJS);
+        this.entityMap.set(info.id, entityJS);
         return entityJS;
     },
     createBullet(info) {
@@ -104,7 +104,7 @@ cc.Class({
         this.bulletLayer.removeAllChildren();
         this.lastShootTime = 0;
         this.pressTime = 0;
-        NetCtrl.Send("cmsg.ReqGameScene")
+        NetCtrl.Send("ReqGameScene")
         //NetCtrl.sendCmd(Cmd.MDM_GF_GAME, Cmd.SUB_MB_GAME_SCENE);
     },
     entityDied(node) {
@@ -115,15 +115,19 @@ cc.Class({
         var data = msg.data;
         //if (this.sceneReady === false && msg.subID !== Cmd.SUB_MB_GAME_SCENE) return;
         switch (msg.msgName) {
-            case "cmsg.RespGameScene": {
+            case "RespGameScene": {
+                if (data.err!="Invalid"){
+                    cc.log(data.err);
+                    return 
+                }
                 this.sceneReady = true;
                 this._showingLayerJS.setLeftClock(data.gameLeftSec);
                 for (let i = 0; i < data.entities.length; i++) {
                     this.createEntity(data.entities[i]);
                 }
-                this.schedule(this.calculateRank, 2);
+               // this.schedule(this.calculateRank, 2);
             }
-            case "cmsg.SNoticeWorldChange": {
+            case "SNoticeWorldChange": {
                 if (data.deleteEntities) {
                     for (let i = 0; i < data.deleteEntities.length; i++) {
                         let entityID = data.deleteEntities[i];
@@ -151,8 +155,9 @@ cc.Class({
                 if (data.changedEntities) {
                     for (let i = 0; i < data.changedEntities.length; i++) {
                         let item = data.changedEntities[i];
-                        let itemJS = this.entityMap.get(item.entityID);
-                        if (item.entityID === G.entityID && item.score !== itemJS.score) {
+                        let entityID = item.id;
+                        let itemJS = this.entityMap.get(entityID);
+                        if (entityID === G.entityID && item.score !== itemJS.score) {
                             this._showingLayerJS.showGetScore(item.score - itemJS.score);
                         }
                         itemJS.applyDisplay(item);
@@ -161,31 +166,33 @@ cc.Class({
 
                 break;
             }
-            case "cmsg.SNoticeNewEntity": {
-                if (data.entityID === G.entityID) return;
-                if (this.entityMap.has(data.entityID)) return;
-                this.createEntity(data);
+            case "SNoticeNewEntity": {
+                let entity = data.entity
+                if (entity.id === G.entityID) return;
+                if (this.entityMap.has(entity.id)) return;
+                this.createEntity(entity);
                 break;
             }
             //接受所有玩家的状态
-            case "cmsg.SNoticeWorldPos": {
+            case "SNoticeWorldPos": {
                 let now = new Date().getTime();
                 if (data.entities) {
                     for (let i = 0; i < data.entities.length; i++) {
                         let item = data.entities[i];
-                        let entityJS = this.entityMap.get(item.entityID);
+                        let entityID = item.id;
+                        let entityJS = this.entityMap.get(entityID);
                         //entityJS.applyInfo(item);
                         //如果是我
-                        if (item.entityID === G.entityID) {
+                        if (entityID=== G.entityID) {
                             entityJS.node.x = item.x;
                             entityJS.node.y = item.y;
                             entityJS.rotation = item.rotation;
-                            entityJS.node.rotation = -item.rotation;
+                            entityJS.node.angle  = item.rotation;
                             if (this.serverReconciliation) {
                                 let j = 0;
                                 while (j < this.pendingInputs.length) {
                                     let input = this.pendingInputs[j];
-                                    if (input.inputSequenceNumber <= data.lastProcessedInputID) {
+                                    if (input.inputSeqID <= data.lastProcessedInputID) {
                                         this.pendingInputs.splice(j, 1);
                                     } else {
                                         entityJS.applyInput(input);
@@ -202,7 +209,7 @@ cc.Class({
                             } else {
                                 entityJS.node.x = item.x;
                                 entityJS.node.y = item.y;
-                                entityJS.node.rotation = -item.rotation;
+                                entityJS.node.angle  = item.rotation;
                             }
                         }
 
@@ -210,13 +217,13 @@ cc.Class({
                 }
                 break;
             }
-            case "cmsg.SNoticeShoot": {
+            case "SNoticeShoot": {
                 this.createBullet(data);
                 this.playBulletEffect(data.creatorEntityID);
                 break;
             }
-            case "cmsg.SNoticeGameOver": {
-                this.unschedule(this.calculateRank);
+            case "SNoticeGameOver": {
+               // this.unschedule(this.calculateRank);
                 this._actionLayerJS.hide();
                 //NetCtrl.close();
                 this.sceneReady = false;
@@ -281,7 +288,12 @@ cc.Class({
         }
     },
     playBulletEffect(creatorID) {
-        let nodeA = this.entityMap.get(creatorID).node;
+        let entityA = this.entityMap.get(creatorID);
+        if (!entityA){
+            cc.log("playBulletEffect entityID not exist",creatorID)
+            return 
+        }
+        let nodeA = entityA.node;
         let nodeB = this.entityMap.get(G.entityID).node;
         let distance = nodeA.position.sub(nodeB.position).mag()
         //let distance = cc.pDistance(nodeA.position, nodeB.position);
@@ -326,13 +338,10 @@ cc.Class({
         this.pressTime = dt;
         // if (this.pressTime < 0.1) return;
         let input = { pressTime: this.pressTime };
-        //this.pressTime = 0;
-        //  let input = { pressTime: dt };
         input.targetRotation = targetRotation;
-        input.inputSequenceNumber = this.inputSequenceNumber++;
-        input.entityID = G.entityID;
-        NetCtrl.send(Cmd.MDM_GF_GAME, Cmd.SUB_MB_MOVE, input);
-
+        input.inputSeqID = this.inputSequenceNumber++;
+        //input.entityID = G.entityID;
+        NetCtrl.Send("ReqMove",input);
         if (this.clientPrediction) {
             let entityJS = this.entityMap.get(G.entityID);
             entityJS.applyInput(input);
@@ -357,7 +366,7 @@ cc.Class({
     },
     interpolateEntities() {
         let now = new Date().getTime();
-        let render_timeStamp = now - G.config.sendWorldTime;
+        let render_timeStamp = now - G.config.noticePosDuration;
         this.entityMap.forEach(function (entityJS, key, mapObj) {
             if (key !== G.entityID) {
                 let buffer = entityJS.positionBuffer;
@@ -383,7 +392,7 @@ cc.Class({
                         entityJS.node.x = x0 + (x1 - x0) * (render_timeStamp - t0) / (t1 - t0);
                         entityJS.node.y = y0 + (y1 - y0) * (render_timeStamp - t0) / (t1 - t0);
                         entityJS.rotation = r0 + (r1 - r0) * (render_timeStamp - t0) / (t1 - t0);
-                        entityJS.node.rotation = -entityJS.rotation;
+                        entityJS.node.angle  = entityJS.rotation;
                     }
                 }
             }
