@@ -879,8 +879,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 120,
-      "height": 50.4
+      "width": 105,
+      "height": 44.1
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -889,7 +889,7 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -145,
+      "x": -131.351,
       "y": -9,
       "z": 0
     },
@@ -929,8 +929,8 @@
     "_useOriginalSize": false,
     "_string": "名字：",
     "_N$string": "名字：",
-    "_fontSize": 40,
-    "_lineHeight": 40,
+    "_fontSize": 35,
+    "_lineHeight": 35,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
@@ -990,7 +990,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 9,
-      "y": -8,
+      "y": -9,
       "z": 0
     },
     "_scale": {
@@ -1172,7 +1172,7 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -90,
+      "x": -84.54,
       "y": 20,
       "z": 0
     },
@@ -1208,10 +1208,10 @@
       }
     ],
     "_useOriginalSize": true,
-    "_string": "小风吹乱了",
-    "_N$string": "小风吹乱了",
-    "_fontSize": 29,
-    "_lineHeight": 40,
+    "_string": "小风吹的我乱了",
+    "_N$string": "小风吹的我乱了",
+    "_fontSize": 24,
+    "_lineHeight": 30,
     "_enableWrapText": false,
     "_N$file": null,
     "_isSystemFontUsed": true,
@@ -1235,8 +1235,8 @@
     "alignMode": 0,
     "_target": null,
     "_alignFlags": 45,
-    "_left": 0,
-    "_right": 0,
+    "_left": 5.459999999999994,
+    "_right": -5.459999999999994,
     "_top": 0,
     "_bottom": 0,
     "_verticalCenter": 0,

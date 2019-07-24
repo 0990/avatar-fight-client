@@ -92,7 +92,7 @@ cc.Class({
         this.node.y = info.y;
         this.positionBuffer = new Array();
         this.node.color = cc.Color.WHITE;
-        this.name = info.nickname;
+        this.nickname = info.nickname;
         this.nameLabel.string = info.nickname;
         this.score = 0;
         this.killCount = 0;

@@ -135,7 +135,7 @@ cc.Class({
         G.isLogined = true;
 
         if (data.inGame){
-            this.SendReqJoinGameMsg();
+            this.SendReqEnterGameMsg();
         }else{
             this.startBtn.interactable = true;
             this.statusInfoLabel.string = "Are you ready?";
@@ -152,8 +152,8 @@ cc.Class({
             this.startBtn.interactable = false;
             this.statusInfoLabel.string = "上轮您已结束，请等待下轮开始!";
             this.failTime = new Date().getTime();
-            this.leftTime = data.gameLeftSec;
-            this.setLeftClock(this.leftTime);
+            this.leftTime = data.gameLeftSec+1;
+            this.setLeftClock();
         } else {
             G.config = data.config;
             G.entityID = data.entityID;
@@ -166,28 +166,28 @@ cc.Class({
             return 
         }
         G.nickname = data.nickname;
-        this.SendReqJoinGameMsg();
+        this.SendReqEnterGameMsg();
     },
 
-    SendReqJoinGameMsg(){
+    SendReqEnterGameMsg(){
         NetCtrl.Send("ReqEnterGame");
     },
     clickJoinGame() {
-        if (!G.isLogined){
-            this.startBtn.interactable = false;
-            this.statusInfoLabel.string = "connect...";
-            this.login()
-        }else{
+        // if (!G.isLogined){
+        //     this.startBtn.interactable = false;
+        //     this.statusInfoLabel.string = "connect...";
+        //     this.login()
+        // }else{
             let nickname = this.nameEditBox.string
             cc.sys.localStorage.setItem('nickname', nickname);
             NetCtrl.Send("ReqJoinGame",{nickname:nickname});
-        }
+       // }
     },
     clockCallback() {
         let count = parseInt(this.leftTime - (new Date().getTime() - this.failTime) / 1000);
         if (count <= 0) {
             this.unschedule(this.clockCallback);
-            this.setStatusInfo("");
+            //this.setStatusInfo("");
             this.clockLabel.string = '';
             this.startBtn.interactable = true;
         } else {
@@ -197,7 +197,7 @@ cc.Class({
     setStatusInfo(string) {
         this.statusInfoLabel.string = string;
     },
-    setLeftClock(leftTime) {
+    setLeftClock() {
         this.unschedule(this.clockCallback);
         this.clockLabel.string = this.leftTime;
         this.schedule(this.clockCallback, 1);

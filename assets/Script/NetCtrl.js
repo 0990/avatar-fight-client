@@ -60,22 +60,25 @@ var NetControl = {
     _onClose: function (event) {
         cc.log(event);
         G.isLogined = false
-        let sceneName = cc.director.getScene().name
-        if (sceneName==="start"){
-            let canvas = cc.director.getScene().getChildByName('Canvas');
-            let startLayer = canvas.getChildByName("startLayer");
-            let startLayerJS = startLayer.getComponent("StartLayer");
-            startLayerJS.showOffline();
-        }else{
-            G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
-                cc.director.loadScene("start",function(){
-                    let canvas = cc.director.getScene().getChildByName('Canvas');
-                    let startLayer = canvas.getChildByName("startLayer");
-                    let startLayerJS = startLayer.getComponent("StartLayer");
-                    startLayerJS.showOffline();
-                });
-            });
-        }
+        G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
+            cc.director.loadScene("start");
+        });
+        // let sceneName = cc.director.getScene().name
+        // if (sceneName==="start"){
+        //     let canvas = cc.director.getScene().getChildByName('Canvas');
+        //     let startLayer = canvas.getChildByName("startLayer");
+        //     let startLayerJS = startLayer.getComponent("StartLayer");
+        //     startLayerJS.showOffline();
+        // }else{
+        //     G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
+        //         cc.director.loadScene("start",function(){
+        //             let canvas = cc.director.getScene().getChildByName('Canvas');
+        //             let startLayer = canvas.getChildByName("startLayer");
+        //             let startLayerJS = startLayer.getComponent("StartLayer");
+        //             startLayerJS.showOffline();
+        //         });
+        //     });
+        // }
     },
     _onMessage: function (obj) {
         cc.log(obj.data instanceof ArrayBuffer);

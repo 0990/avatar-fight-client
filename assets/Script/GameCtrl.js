@@ -238,7 +238,7 @@ cc.Class({
                             let obj = {};
                             obj.entityID = key;
                             obj.score = entityJS.score;
-                            obj.name = entityJS.name;
+                            obj.nickname = entityJS.nickname;
                             obj.killCount = entityJS.killCount;
                             obj.headImgUrl = entityJS.headImgUrl;
                             obj.accountType = entityJS.accountType;
@@ -254,7 +254,8 @@ cc.Class({
                             return a.entityID > b.entityID;
                         }
                     });
-                    G.gameEnd.rankInfo = objArr;
+                   // let rank = {list:objArr};
+                    G.gameEnd.rank={list:objArr};
                 } else {
                     // for (let i = 0; i < data.rankInfo.length; i++) {
                     //     let item = data.rankInfo[i];

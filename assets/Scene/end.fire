@@ -18,6 +18,9 @@
       },
       {
         "__id__": 17
+      },
+      {
+        "__id__": 58
       }
     ],
     "_active": true,
@@ -446,7 +449,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 120,
+      "width": 114,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -496,7 +499,7 @@
     "_useOriginalSize": false,
     "_string": "排行榜",
     "_N$string": "排行榜",
-    "_fontSize": 40,
+    "_fontSize": 38,
     "_lineHeight": 40,
     "_enableWrapText": true,
     "_N$file": null,
@@ -614,7 +617,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 70,
-      "y": -7,
+      "y": -4,
       "z": 0
     },
     "_scale": {
@@ -1154,7 +1157,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 33,
+      "y": 96,
       "z": 0
     },
     "_scale": {
@@ -1360,7 +1363,7 @@
         "__id__": 34
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -2277,8 +2280,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -580,
-      "y": 240,
+      "x": -317.933,
+      "y": -172,
       "z": 0
     },
     "_scale": {
@@ -2311,10 +2314,10 @@
     "_enabled": true,
     "alignMode": 0,
     "_target": null,
-    "_alignFlags": 33,
-    "_left": 0,
-    "_right": 1220,
-    "_top": 120,
+    "_alignFlags": 9,
+    "_left": 322.067,
+    "_right": 863.754,
+    "_top": 532,
     "_bottom": 0,
     "_verticalCenter": 0,
     "_horizontalCenter": 0,
@@ -2371,5 +2374,95 @@
     "_fitWidth": false,
     "_fitHeight": false,
     "_id": "c1m3unnjlOB7ZFMwvpNEki"
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "label",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 1
+    },
+    "_children": [],
+    "_active": true,
+    "_level": 1,
+    "_components": [
+      {
+        "__id__": 59
+      }
+    ],
+    "_prefab": null,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 140,
+      "height": 37.8
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_position": {
+      "__type__": "cc.Vec3",
+      "x": 975.569,
+      "y": 649.905,
+      "z": 0
+    },
+    "_scale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_eulerAngles": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_is3DNode": false,
+    "groupIndex": 0,
+    "_rotationX": 0,
+    "_rotationY": 0,
+    "_id": "51LKRVLnZGi6vr0XIXc01R"
+  },
+  {
+    "__type__": "cc.Label",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 58
+    },
+    "_enabled": true,
+    "_materials": [
+      {
+        "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
+      }
+    ],
+    "_useOriginalSize": false,
+    "_string": "击杀数   得分",
+    "_N$string": "击杀数   得分",
+    "_fontSize": 24,
+    "_lineHeight": 30,
+    "_enableWrapText": true,
+    "_N$file": null,
+    "_isSystemFontUsed": true,
+    "_spacingX": 0,
+    "_batchAsBitmap": false,
+    "_N$horizontalAlign": 1,
+    "_N$verticalAlign": 1,
+    "_N$fontFamily": "Arial",
+    "_N$overflow": 0,
+    "_N$cacheMode": 0,
+    "_id": "31l81KTZtNML5ca66Ewo9c"
   }
 ]
