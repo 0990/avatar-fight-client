@@ -125,7 +125,7 @@ cc.Class({
                 for (let i = 0; i < data.entities.length; i++) {
                     this.createEntity(data.entities[i]);
                 }
-               // this.schedule(this.calculateRank, 2);
+                this.schedule(this.calculateRank, 2);
             }
             case "SNoticeWorldChange": {
                 if (data.deleteEntities) {
@@ -222,8 +222,11 @@ cc.Class({
                 this.playBulletEffect(data.creatorEntityID);
                 break;
             }
+            case "RespPing":{
+                break;
+            }
             case "SNoticeGameOver": {
-               // this.unschedule(this.calculateRank);
+                this.unschedule(this.calculateRank);
                 this._actionLayerJS.hide();
                 //NetCtrl.close();
                 this.sceneReady = false;
@@ -247,9 +250,9 @@ cc.Class({
                     });
                     objArr.sort(function (a, b) {
                         if (a.score < b.score) {
-                            return true;
+                            return 1;
                         } else if (a.score > b.score) {
-                            return false;
+                            return -1;
                         } else {
                             return a.entityID > b.entityID;
                         }
@@ -418,18 +421,18 @@ cc.Class({
     calculateRank() {
         let objArr = new Array();
         this.entityMap.forEach(function (entityJS, key, mapObj) {
-            if (entityJS.dead === false) {
+            //if (entityJS.dead === false) {
                 let obj = {};
                 obj.entityID = key;
                 obj.score = entityJS.score;
                 objArr.push(obj);
-            }
+           // }
         });
         objArr.sort(function (a, b) {
             if (a.score < b.score) {
-                return true;
+                return 1;
             } else if (a.score > b.score) {
-                return false;
+                return -1;
             } else {
                 return a.entityID > b.entityID;
             }
@@ -441,7 +444,7 @@ cc.Class({
             if (i < 3) {
                 let index = i + 1;
                 let entityJS = this.entityMap.get(objArr[i].entityID);
-                let string = index + "," + entityJS.score + "分:" + entityJS.name;
+                let string = index + "," + entityJS.score + "分:" + entityJS.nickname;
                 this._showingLayerJS.setRank(i, string);
             }
         }

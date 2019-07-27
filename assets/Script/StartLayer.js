@@ -110,7 +110,7 @@ cc.Class({
         });
     },
     onNetMsg(detail){
-        cc.log("startLayer netmsg",detail);
+        //cc.log("startLayer netmsg",detail);
         let  data = detail.data
         switch (detail.msgName){
             case "RespLogin":

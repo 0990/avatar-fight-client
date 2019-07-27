@@ -49,7 +49,7 @@ let MsgMgr= {
             let msgid = Util.CRC32(fullName);
             this.msgFullName2id.set(fullName,msgid)
             this.msgid2NameObj.set(msgid,{packageName:this.packageName,msgName:msgName});
-            cc.log(key,msgid);//json对象中属性的名字：对象中属性的值
+           // cc.log(key,msgid);//json对象中属性的名字：对象中属性的值
         }
     }
 };

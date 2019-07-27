@@ -1,16 +1,27 @@
 {
-  "appKey": "",
-  "appSecret": "",
+  "android-instant": {
+    "REMOTE_SERVER_ROOT": "",
+    "host": "",
+    "pathPattern": "",
+    "recordPath": "",
+    "scheme": "https",
+    "skipRecord": false
+  },
+  "appBundle": false,
+  "baidugame": {
+    "REMOTE_SERVER_ROOT": "",
+    "appid": "testappid",
+    "orientation": "portrait",
+    "subContext": ""
+  },
   "encryptJs": false,
   "excludeScenes": [],
-  "includeAnySDK": false,
+  "fb-instant-games": {},
   "includeSDKBox": false,
   "inlineSpriteFrames": true,
   "inlineSpriteFrames_native": false,
-  "jailbreakPlatform": false,
   "md5Cache": false,
   "mergeStartScene": false,
-  "oauthLoginServer": "",
   "optimizeHotUpdate": false,
   "orientation": {
     "landscapeLeft": true,
@@ -19,20 +30,17 @@
     "upsideDown": false
   },
   "packageName": "org.cocos2d.shootgame",
-  "privateKey": "",
-  "renderMode": "0",
+  "qqplay": {
+    "REMOTE_SERVER_ROOT": "",
+    "orientation": "portrait"
+  },
   "startScene": "991efca1-4933-478e-b0b0-00c9e48fbbf6",
-  "title": "shootGame",
+  "title": "avatar-fight-client",
   "webOrientation": "landscape",
   "wechatgame": {
     "appid": "",
     "orientation": "landscape"
   },
   "xxteaKey": "28860d39-a818-43",
-  "zipCompressJs": true,
-  "qqplay": {
-    "orientation": "portrait",
-    "REMOTE_SERVER_ROOT": ""
-  },
-  "fb-instant-games": {}
+  "zipCompressJs": true
 }

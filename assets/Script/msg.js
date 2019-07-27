@@ -5667,6 +5667,220 @@ $root.cmsg = (function() {
         return SNoticeNewEntity;
     })();
 
+    cmsg.SNoticeKickOut = (function() {
+
+        /**
+         * Properties of a SNoticeKickOut.
+         * @memberof cmsg
+         * @interface ISNoticeKickOut
+         * @property {cmsg.SNoticeKickOut.Reason|null} [reason] SNoticeKickOut reason
+         */
+
+        /**
+         * Constructs a new SNoticeKickOut.
+         * @memberof cmsg
+         * @classdesc Represents a SNoticeKickOut.
+         * @implements ISNoticeKickOut
+         * @constructor
+         * @param {cmsg.ISNoticeKickOut=} [properties] Properties to set
+         */
+        function SNoticeKickOut(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * SNoticeKickOut reason.
+         * @member {cmsg.SNoticeKickOut.Reason} reason
+         * @memberof cmsg.SNoticeKickOut
+         * @instance
+         */
+        SNoticeKickOut.prototype.reason = 0;
+
+        /**
+         * Creates a new SNoticeKickOut instance using the specified properties.
+         * @function create
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {cmsg.ISNoticeKickOut=} [properties] Properties to set
+         * @returns {cmsg.SNoticeKickOut} SNoticeKickOut instance
+         */
+        SNoticeKickOut.create = function create(properties) {
+            return new SNoticeKickOut(properties);
+        };
+
+        /**
+         * Encodes the specified SNoticeKickOut message. Does not implicitly {@link cmsg.SNoticeKickOut.verify|verify} messages.
+         * @function encode
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {cmsg.ISNoticeKickOut} message SNoticeKickOut message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        SNoticeKickOut.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.reason != null && message.hasOwnProperty("reason"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int32(message.reason);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified SNoticeKickOut message, length delimited. Does not implicitly {@link cmsg.SNoticeKickOut.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {cmsg.ISNoticeKickOut} message SNoticeKickOut message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        SNoticeKickOut.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a SNoticeKickOut message from the specified reader or buffer.
+         * @function decode
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {cmsg.SNoticeKickOut} SNoticeKickOut
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        SNoticeKickOut.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cmsg.SNoticeKickOut();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.reason = reader.int32();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a SNoticeKickOut message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {cmsg.SNoticeKickOut} SNoticeKickOut
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        SNoticeKickOut.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a SNoticeKickOut message.
+         * @function verify
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        SNoticeKickOut.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.reason != null && message.hasOwnProperty("reason"))
+                switch (message.reason) {
+                default:
+                    return "reason: enum value expected";
+                case 0:
+                case 1:
+                    break;
+                }
+            return null;
+        };
+
+        /**
+         * Creates a SNoticeKickOut message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {cmsg.SNoticeKickOut} SNoticeKickOut
+         */
+        SNoticeKickOut.fromObject = function fromObject(object) {
+            if (object instanceof $root.cmsg.SNoticeKickOut)
+                return object;
+            var message = new $root.cmsg.SNoticeKickOut();
+            switch (object.reason) {
+            case "Invalid":
+            case 0:
+                message.reason = 0;
+                break;
+            case "Relogin":
+            case 1:
+                message.reason = 1;
+                break;
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a SNoticeKickOut message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof cmsg.SNoticeKickOut
+         * @static
+         * @param {cmsg.SNoticeKickOut} message SNoticeKickOut
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        SNoticeKickOut.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults)
+                object.reason = options.enums === String ? "Invalid" : 0;
+            if (message.reason != null && message.hasOwnProperty("reason"))
+                object.reason = options.enums === String ? $root.cmsg.SNoticeKickOut.Reason[message.reason] : message.reason;
+            return object;
+        };
+
+        /**
+         * Converts this SNoticeKickOut to JSON.
+         * @function toJSON
+         * @memberof cmsg.SNoticeKickOut
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        SNoticeKickOut.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        /**
+         * Reason enum.
+         * @name cmsg.SNoticeKickOut.Reason
+         * @enum {string}
+         * @property {number} Invalid=0 Invalid value
+         * @property {number} Relogin=1 Relogin value
+         */
+        SNoticeKickOut.Reason = (function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[0] = "Invalid"] = 0;
+            values[valuesById[1] = "Relogin"] = 1;
+            return values;
+        })();
+
+        return SNoticeKickOut;
+    })();
+
     return cmsg;
 })();
 

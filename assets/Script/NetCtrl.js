@@ -19,6 +19,7 @@ var NetControl = {
         }
     },
     close: function () {
+        G.isLogined = false
         this._socket.onclose = undefined;
         this._socket.onerror = undefined;
         if (this._socket && cc.sys.isObjectValid(this._socket)) {
@@ -63,38 +64,24 @@ var NetControl = {
         G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
             cc.director.loadScene("start");
         });
-        // let sceneName = cc.director.getScene().name
-        // if (sceneName==="start"){
-        //     let canvas = cc.director.getScene().getChildByName('Canvas');
-        //     let startLayer = canvas.getChildByName("startLayer");
-        //     let startLayerJS = startLayer.getComponent("StartLayer");
-        //     startLayerJS.showOffline();
-        // }else{
-        //     G.alert("网络连接失败，重新连接？", G.AT.OK,function(){
-        //         cc.director.loadScene("start",function(){
-        //             let canvas = cc.director.getScene().getChildByName('Canvas');
-        //             let startLayer = canvas.getChildByName("startLayer");
-        //             let startLayerJS = startLayer.getComponent("StartLayer");
-        //             startLayerJS.showOffline();
-        //         });
-        //     });
-        // }
     },
     _onMessage: function (obj) {
-        cc.log(obj.data instanceof ArrayBuffer);
-        cc.log(obj.data instanceof Blob);
-        cc.log(typeof(obj.data));
         let reader = new FileReader();
         let self = this;
         reader.onload = function(result) {
             let arrayBuffer = event.target.result;
-            console.log(arrayBuffer);
             var decode = Util.Decode(arrayBuffer);
-            cc.log("receiver",decode);
             let protoData = new Uint8Array(decode.protoData);
             var detail = MsgMgr.Unmarshal(decode.msgID,protoData);
-            cc.log("netmsg",detail);
-            self.fire('netmsg', detail);
+           if (detail.msgName ==="SNoticeKickOut"){
+                self.close();
+                G.alert("重复登录被T出,重新登录？", G.AT.OK,function(){
+                    cc.director.loadScene("start");
+                });
+           }else{
+                self.fire('netmsg', detail);
+           }
+            
         }
         reader.readAsArrayBuffer(obj.data);
 
@@ -108,7 +95,7 @@ var NetControl = {
             let msgID = MsgMgr.MsgID(msgName);
             let data = Util.Encode(msgID,protoData);
             let fullName = MsgMgr.fullName(msgName);
-            cc.log("send",fullName,msgID,data);
+            //cc.log("send",fullName,msgID,data);
             this._socket.send(data);
         }
     },
