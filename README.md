@@ -1,6 +1,6 @@
 # 头像大乱战
 cocos creator开发的对战小游戏客户端protobuf版<br>
-点此试玩：http://34.92.209.203<br>
+点此试玩：http://avatarfight.0990game.tk<br>
 
 # 改善
 1，原项目使用json通信，网络流量较高，protobuf会节省不少流量<br>
