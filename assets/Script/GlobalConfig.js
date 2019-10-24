@@ -21,8 +21,8 @@ window.G = {
 
 module.exports = {
     debugMode: false,
-    logonHost: "ws://127.0.0.1",
-    //logonHost: "ws://34.92.209.203",
+   // logonHost: "ws://127.0.0.1",
+    logonHost: "ws://avatarfight.0990game.tk",
 
     logonPort: 9000,
     //websocket协议
