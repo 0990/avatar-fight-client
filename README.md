@@ -14,4 +14,4 @@ cocos creator开发的对战小游戏客户端protobuf版<br>
 # 编译运行
 客户端使用cocos creator2.1.2打开项目，运行即可
 
-[服务端改由代码在此(golang)](https://github.com/0990/avatar-fight-server)
+[服务端代码在此(golang)](https://github.com/0990/avatar-fight-server)
