@@ -1,11 +1,5 @@
 # 头像大乱战
-cocos creator开发的对战小游戏客户端protobuf版<br>
-[桌面端试玩](http://af.09900990.xyz:5050/)<br>
-[手机端试玩](http://af.0990.tech:5000/)<br>
-
-# 改善
-1，原项目使用json通信，网络流量较高，protobuf会节省不少流量<br>
-2，界面做了部分简洁处理<br>
+cocos creator开发的对战小游戏客户端protobuf通信版([桌面端试玩](http://af.09900990.xyz:5050/),[手机端试玩](http://af.0990.tech:5000/))<br>
 
 # 操作
 ![login](doc/login.png)<br>
