@@ -20,7 +20,7 @@
         "__id__": 35
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [],
     "_prefab": null,
@@ -78,7 +78,7 @@
       }
     ],
     "_active": true,
-    "_level": 0,
+    "_level": 1,
     "_components": [
       {
         "__id__": 34
@@ -1208,8 +1208,8 @@
       }
     ],
     "_useOriginalSize": true,
-    "_string": "小风吹的我乱了",
-    "_N$string": "小风吹的我乱了",
+    "_string": "小风吹乱了",
+    "_N$string": "小风吹乱了",
     "_fontSize": 24,
     "_lineHeight": 30,
     "_enableWrapText": false,
@@ -1547,7 +1547,7 @@
       }
     ],
     "_active": true,
-    "_level": 0,
+    "_level": 1,
     "_components": [
       {
         "__id__": 38
